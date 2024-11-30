@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Scoreboard</title>
+</head>
+<body>
+    <h1>Weather Guesser Scoreboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>City</th>
+                <th>Guess</th>
+                <th>Actual Temp</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Scoreboard data will be dynamically inserted here -->
+            {{SCOREBOARD_DATA}}
+        </tbody>
+    </table>
+    <form action="./index.html" method="GET">
+        <button type="submit">Back to Main</button>
+    </form>
+</body>
+</html>
