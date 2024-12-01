@@ -1,19 +1,16 @@
-#!/bin/bash
-
-SCOREBOARD_FILE="/tmp/scoreboard.txt"
-
-# Check if the scoreboard file exists
-if [ ! -f "$SCOREBOARD_FILE" ]; then
-    echo "Content-type: text/html"
-    echo ""
-    echo "<p>Error: Scoreboard file not found at $SCOREBOARD_FILE</p>"
-    exit 1
-fi
-
-# Read and format rows from the scoreboard file
-SCOREBOARD_ROWS=$(awk -F',' '{
-    printf "<tr><td>%s</td><td>%s</td><td>%s °C</td><td>%s °C</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5
-}' "$SCOREBOARD_FILE")
-
-# Replace {{SCOREBOARD_DATA}} in the HTML
-cat index.html | sed "s/{{SCOREBOARD_DATA}}/$SCOREBOARD_ROWS/"
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>City</th>
+            <th>Guess</th>
+            <th>Actual Temp</th>
+            <th>Result</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>John</td><td>London</td><td>15 °C</td><td>10 °C</td><td>Win</td></tr>
+        <tr><td>Alice</td><td>Tokyo</td><td>25 °C</td><td>22 °C</td><td>Lose</td></tr>
+        <tr><td>Bob</td><td>Sydney</td><td>30 °C</td><td>28 °C</td><td>Win</td></tr>
+    </tbody>
+</table>
