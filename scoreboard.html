@@ -1,31 +1,19 @@
+#!/bin/bash
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Scoreboard</title>
-</head>
-<body>
-    <h1>Weather Guesser Scoreboard</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>City</th>
-                <th>Guess</th>
-                <th>Actual Temp</th>
-                <th>Result</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Scoreboard data will be dynamically inserted here -->
-            {{SCOREBOARD_DATA}}
-        </tbody>
-    </table>
-    <form action="./index.html" method="GET">
-        <button type="submit">Back to Main</button>
-    </form>
-</body>
-</html>
+SCOREBOARD_FILE="/tmp/scoreboard.txt"
+
+# Check if the scoreboard file exists
+if [ ! -f "$SCOREBOARD_FILE" ]; then
+    echo "Content-type: text/html"
+    echo ""
+    echo "<p>Error: Scoreboard file not found at $SCOREBOARD_FILE</p>"
+    exit 1
+fi
+
+# Read and format rows from the scoreboard file
+SCOREBOARD_ROWS=$(awk -F',' '{
+    printf "<tr><td>%s</td><td>%s</td><td>%s °C</td><td>%s °C</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5
+}' "$SCOREBOARD_FILE")
+
+# Replace {{SCOREBOARD_DATA}} in the HTML
+cat index.html | sed "s/{{SCOREBOARD_DATA}}/$SCOREBOARD_ROWS/"
