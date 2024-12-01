@@ -1,37 +1,56 @@
-#!/bin/bash
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Guessing Game</title>
+</head>
+<body>
+    <h1>Weather Guessing Game</h1>
+    <p>Welcome to the Weather Guessing Game! Here is how to play:</p>
+    <ul>
+        <li>Choose a city from the dropdown menu.</li>
+        <li>Guess the current temperature in that city.</li>
+        <li>If your guess is within 5°C, you win!</li>
+    </ul>
+    <form action="./game.sh" method="post">
+        <label for="city">City:</label>
+        <select name="city" id="city">
+            <option value="London">London</option>
+            <option value="Tokyo">Tokyo</option>
+            <option value="Sydney">Sydney</option>
+            <option value="Cairo">Cairo</option>
+            <option value="Paris">Paris</option>
+            <option value="Moscow">Moscow</option>
+            <option value="Beijing">Beijing</option>
+            <option value="Toronto">Toronto</option>
+        </select>
+        <label for="guess"><span class="bold">Your temperature guess in (°C):</span></label>
+        <input type="number" name="guess" id="guess" required>
+        <button type="submit"><span class="bold">Submit guess</span></button>
+    </form>
 
-SCOREBOARD_FILE="/tmp/scoreboard.txt"
+    <h2>Scoreboard</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>City</th>
+                <th>Guess</th>
+                <th>Actual Temp</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+                {{SCOREBOARD_DATA}}
+            
+            
+            <tr><td>John</td><td>London</td><td>15 °C</td><td>10 °C</td><td>Win</td></tr>
+            <tr><td>Alice</td><td>Tokyo</td><td>25 °C</td><td>22 °C</td><td>Lose</td></tr>
+            <tr><td>Bob</td><td>Sydney</td><td>30 °C</td><td>28 °C</td><td>Win</td></tr>
+        </tbody>
+    </table>
+</body>
+</html>
 
-echo "Content-type: text/html"
-echo ""
-
-# If a POST request is received, update the scoreboard file
-if [ "$REQUEST_METHOD" == "POST" ]; then
-    read POST_DATA
-    USERNAME=$(echo "$POST_DATA" | sed -n 's/^.*username=\([^&]*\).*$/\1/p')
-    RESULT=$(echo "$POST_DATA" | sed -n 's/^.*result=\([^&]*\).*$/\1/p')
-
-    awk -F: -v user="$USERNAME" -v result="$RESULT" '
-    BEGIN {updated = 0}
-    {
-        if ($1 == user) {
-            $2++; result == "WIN" ? $3++ : $4++;
-            updated = 1;
-        }
-        print $0
-    }
-    END {
-        if (!updated) {
-            print user ":1:" (result == "WIN" ? "1:0" : "0:1")
-        }
-    }' "$SCOREBOARD_FILE" > "${SCOREBOARD_FILE}.tmp" && mv "${SCOREBOARD_FILE}.tmp" "$SCOREBOARD_FILE"
-    exit
-fi
-
-# Generate dynamic scoreboard rows
-SCOREBOARD_ROWS=$(awk -F: '{
-    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4
-}' "$SCOREBOARD_FILE")
-
-# Read and replace the placeholder in index.html
-cat index.html | sed "s/{{SCOREBOARD_DATA}}/$SCOREBOARD_ROWS/"
