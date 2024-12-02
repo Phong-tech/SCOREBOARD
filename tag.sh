@@ -1,3 +1,5 @@
+
+
 #!/bin/bash
 
 USER_FILE="/home/phong/idg1100-exam-main/login.txt"
@@ -39,19 +41,16 @@ echo ""
 # Call the handle_user function
 handle_user
 
-# HTML Response
+# Redirect to game.html
 cat <<EOF
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Gamer Tag Submission</title>
+    <meta http-equiv="refresh" content="0;url=game.html">
+    <title>Redirecting...</title>
 </head>
 <body>
-    <h1>Submission Successful</h1>
-    <p>Thank you, your gamer tag has been recorded.</p>
-    <a href="./index.html">Go Back</a>
+    <p>Redirecting to game.html...</p>
 </body>
 </html>
 EOF
-
