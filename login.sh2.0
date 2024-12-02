@@ -27,6 +27,11 @@ function login_user() {
     if awk -F: -v user="$username" -v pass="$password" '$1 == user && $2 == pass {exit 0} END {exit 1}' "$USER_FILE"; then
         echo "Login successful!"
         echo "$username" > /tmp/current_user.txt
+
+        # Redirect to game.html (for web environment)
+        echo "Content-type: text/html"
+        echo ""
+        echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
         return 0
     else
         echo "Invalid credentials."
@@ -45,4 +50,5 @@ elif [[ "$option" == "2" ]]; then
 else
     echo "Invalid option."
 fi
+
 
