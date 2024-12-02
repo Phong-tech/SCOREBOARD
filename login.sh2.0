@@ -1,18 +1,21 @@
 #!/bin/bash
 
-USER_FILE="/path/to/users.txt"
+USER_FILE="/home/phong/idg1100-exam-main/login.txt"
 
 # Register a new user
 function register_user() {
     read -p "Enter username: " username
     read -sp "Enter password: " password
     echo
-    if grep -q "^$username:" "$USER_FILE"; then
+    # Use awk to check if the username exists
+    if awk -F: -v user="$username" '$1 == user {exit 0} END {exit 1}' "$USER_FILE"; then
         echo "Username already exists. Please log in."
         return 1
     fi
+    # Add the new user
     echo "$username:$password" >> "$USER_FILE"
     echo "Registration successful!"
+    return 0
 }
 
 # Log in an existing user
@@ -20,7 +23,8 @@ function login_user() {
     read -p "Enter username: " username
     read -sp "Enter password: " password
     echo
-    if grep -q "^$username:$password" "$USER_FILE"; then
+    # Use awk to validate credentials
+    if awk -F: -v user="$username" -v pass="$password" '$1 == user && $2 == pass {exit 0} END {exit 1}' "$USER_FILE"; then
         echo "Login successful!"
         echo "$username" > /tmp/current_user.txt
         return 0
@@ -41,3 +45,4 @@ elif [[ "$option" == "2" ]]; then
 else
     echo "Invalid option."
 fi
+
