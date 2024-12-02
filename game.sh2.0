@@ -1,0 +1,40 @@
+#!/bin/bash
+
+LEADERBOARD_SCRIPT="/path/to/leaderboard.sh"
+CURRENT_USER_FILE="/tmp/current_user.txt"
+
+# Ensure the user is logged in
+if [[ ! -f "$CURRENT_USER_FILE" ]]; then
+    echo "Please log in first."
+    bash /path/to/login.sh
+fi
+current_user=$(cat "$CURRENT_USER_FILE")
+
+# Core game logic (already provided)
+read POST_DATA
+CITY=$(echo "$POST_DATA" | sed -n 's/.*city=\([^&]*\).*/\1/p')
+GUESS=$(echo "$POST_DATA" | sed -n 's/.*guess=\([^&]*\).*/\1/p')
+
+GEO_RESPONSE=$(curl -s "https://nominatim.openstreetmap.org/search?q=$CITY&format=json&limit=1")
+LATITUDE=$(echo "$GEO_RESPONSE" | jq -r '.[0].lat')
+LONGITUDE=$(echo "$GEO_RESPONSE" | jq -r '.[0].lon')
+
+WEATHER_RESPONSE=$(curl -s "https://api.open-meteo.com/v1/forecast?latitude=$LATITUDE&longitude=$LONGITUDE&current_weather=true")
+TEMPERATURE=$(echo "$WEATHER_RESPONSE" | jq -r '.current_weather.temperature')
+
+DIFF=$(echo "$TEMPERATURE - $GUESS" | bc | awk '{print ($1<0)?-$1:$1}')
+if (( $(echo "$DIFF <= 5" | bc -l) )); then
+    RESULT="You Win! 🎉"
+else
+    RESULT="You Lose. 😔"
+fi
+
+# Update leaderboard
+bash "$LEADERBOARD_SCRIPT" update "$current_user" "$DIFF"
+
+# Display result
+cat template.html \
+    | sed "s/{{CITY}}/$CITY/g" \
+    | sed "s/{{GUESS}}/$GUESS/g" \
+    | sed "s/{{TEMPERATURE}}/$TEMPERATURE/g" \
+    | sed "s/{{RESULT}}/$RESULT/g"
