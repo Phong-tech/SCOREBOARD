@@ -1,10 +1,13 @@
-!/bin/bash
+#!/bin/bash
 
 USER_FILE="/home/phong/idg1100-exam-main/login.txt"
 
-
+# Register or log in a user
 function handle_user() {
-    read -p "Enter your gamer tag: " gamertag
+    # Read POST data (when called from the form)
+    read POST_DATA
+    gamertag=$(echo "$POST_DATA" | sed -n 's/.*gamertag=\([^&]*\).*/\1/p' | sed 's/+/ /g' | tr -d '\r')
+
     echo
 
     # Check if the gamer tag exists in the user file using grep
@@ -27,13 +30,28 @@ function handle_user() {
         echo "Error: Unable to write to current_user.txt. Check permissions." >&2
         exit 1
     fi
-    
- Main function
- echo "1. Enter Gamer Tag to Play"
- read -p "Select an option: " option
- if [[ "$option" == "1" ]]; then
-     handle_user
- else
-    echo "Invalid option."
- fi
 }
+
+# Output HTTP headers
+echo "Content-type: text/html"
+echo ""
+
+# Call the handle_user function
+handle_user
+
+# HTML Response
+cat <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gamer Tag Submission</title>
+</head>
+<body>
+    <h1>Submission Successful</h1>
+    <p>Thank you, your gamer tag has been recorded.</p>
+    <a href="./index.html">Go Back</a>
+</body>
+</html>
+EOF
+
