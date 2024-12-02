@@ -2,53 +2,58 @@
 
 USER_FILE="/home/phong/idg1100-exam-main/login.txt"
 
-# Register a new user
-function register_user() {
-    read -p "Enter username: " username
-    read -sp "Enter password: " password
-    echo
-    # Use awk to check if the username exists
-    if awk -F: -v user="$username" '$1 == user {exit 0} END {exit 1}' "$USER_FILE"; then
-        echo "Username already exists. Please log in."
-        return 1
-    fi
-    # Add the new user
-    echo "$username:$password" >> "$USER_FILE"
-    echo "Registration successful!"
-    return 0
-}
+# Read POST data
+read POST_DATA
+USERNAME=$(echo "$POST_DATA" | sed -n 's/.*username=\([^&]*\).*/\1/p')
+PASSWORD=$(echo "$POST_DATA" | sed -n 's/.*password=\([^&]*\).*/\1/p')
+CREATE_ACCOUNT=$(echo "$POST_DATA" | sed -n 's/.*create_account=\([^&]*\).*/\1/p')
 
-# Log in an existing user
-function login_user() {
-    read -p "Enter username: " username
-    read -sp "Enter password: " password
-    echo
-    # Use awk to validate credentials
-    if awk -F: -v user="$username" -v pass="$password" '$1 == user && $2 == pass {exit 0} END {exit 1}' "$USER_FILE"; then
-        echo "Login successful!"
-        echo "$username" > /tmp/current_user.txt
-
-        # Redirect to game.html (for web environment)
+# Check if we are creating an account
+if [[ "$CREATE_ACCOUNT" == "yes" ]]; then
+    # Check if username already exists
+    if grep -q "^$USERNAME:" "$USER_FILE"; then
         echo "Content-type: text/html"
         echo ""
-        echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
-        return 0
+        echo "<html><body>"
+        echo "<h1>Account Creation Failed</h1>"
+        echo "<p>The username '$USERNAME' already exists. Please try a different username.</p>"
+        echo "<a href='/index.html'>Go back</a>"
+        echo "</body></html>"
     else
-        echo "Invalid credentials."
-        return 1
+        # Save the new user account
+        echo "$USERNAME:$PASSWORD" >> "$USER_FILE"
+        echo "Content-type: text/html"
+        echo ""
+        echo "<html><body>"
+        echo "<h1>Account Created Successfully</h1>"
+        echo "<p>Your account has been created! You can now log in.</p>"
+        echo "<a href='/index.html'>Log in</a>"
+        echo "</body></html>"
     fi
-}
-
-# Main function
-echo "1. Register"
-echo "2. Login"
-read -p "Select an option: " option
-if [[ "$option" == "1" ]]; then
-    while ! register_user; do :; done
-elif [[ "$option" == "2" ]]; then
-    while ! login_user; do :; done
-else
-    echo "Invalid option."
+    exit
 fi
 
-
+# Check if credentials match
+USER_DATA=$(grep "^$USERNAME:$PASSWORD" "$USER_FILE")
+if [[ -n "$USER_DATA" ]]; then
+    # Successful login
+    echo "Content-type: text/html"
+    echo ""
+    echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
+    echo "$USERNAME" > /tmp/current_user.txt
+else
+    # If credentials don't match, ask if they want to create an account
+    echo "Content-type: text/html"
+    echo ""
+    echo "<html><body>"
+    echo "<h1>Login Failed</h1>"
+    echo "<p>Account not found. Would you like to create an account?</p>"
+    echo "<form action='./login.sh' method='post'>"
+    echo "<input type='hidden' name='create_account' value='yes'>"
+    echo "<input type='hidden' name='username' value='$USERNAME'>"
+    echo "<input type='hidden' name='password' value='$PASSWORD'>"
+    echo "<button type='submit'>Create Account</button>"
+    echo "</form>"
+    echo "<a href='/index.html'>Go back</a>"
+    echo "</body></html>"
+fi
