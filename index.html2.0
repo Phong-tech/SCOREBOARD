@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Guessing Game</title>
+</head>
+<body>
+    <h1>Weather Guessing Game</h1>
+    <p>Welcome to the Weather Guessing Game! Here is how to play:</p>
+    <ul>
+        <li>Choose a city from the dropdown menu.</li>
+        <li>Guess the current temperature in that city.</li>
+        <li>If your guess is within 5°C, you win!</li>
+    </ul>
+    
+    <!-- Game Form -->
+    <form action="./game.sh" method="post">
+        <label for="city">City:</label>
+        <select name="city" id="city">
+            <option value="London">London</option>
+            <option value="Tokyo">Tokyo</option>
+            <option value="Sydney">Sydney</option>
+            <option value="Cairo">Cairo</option>
+            <option value="Paris">Paris</option>
+            <option value="Moscow">Moscow</option>
+            <option value="Beijing">Beijing</option>
+            <option value="Toronto">Toronto</option>
+        </select>
+        <br>
+        <label for="guess"><span class="bold">Your temperature guess (°C):</span></label>
+        <input type="number" name="guess" id="guess" required>
+        <button type="submit"><span class="bold">Submit Guess</span></button>
+    </form>
+
+    <!-- Leaderboard Section -->
+    <h2>Leaderboard</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Games Played</th>
+                <th>Average Difference</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{LEADERBOARD_DATA}}
+        </tbody>
+    </table>
+
+    <!-- Include Results -->
+    <h2>Results</h2>
+    <p>City: <span id="result-city">{{CITY}}</span></p>
+    <p>Your Guess: <span id="result-guess">{{GUESS}}</span>°C</p>
+    <p>Actual Temperature: <span id="result-temp">{{TEMPERATURE}}</span>°C</p>
+    <p><strong>Result: <span id="result-outcome">{{RESULT}}</span></strong></p>
+</body>
+</html>
