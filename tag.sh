@@ -1,14 +1,18 @@
 function handle_user() {
     read -p "Enter your gamer tag: " gamertag
     echo
-    if awk -F: -v user="$gamertag" '$1 == user {exit 0} END {exit 1}' "$USER_FILE"; then
+
+    # Check if the gamer tag exists in the user file using grep
+    if grep -q "^$gamertag$" "$USER_FILE"; then
         echo "Welcome back, $gamertag! You are now logged in."
     else
-        echo "$gamertag" >> "$USER_FILE" || {
+        # Add the new gamer tag to the file
+        if echo "$gamertag" >> "$USER_FILE"; then
+            echo "Registration successful! Welcome, $gamertag!"
+        else
             echo "Error: Could not write to $USER_FILE" >&2
             exit 1
-        }
-        echo "Registration successful! Welcome, $gamertag!"
+        fi
     fi
 
     # Save the logged-in user to the session file
