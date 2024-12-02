@@ -1,41 +1,22 @@
-# Register a new user
-function register_user() {
-    read -p "Enter username: " username
-    read -sp "Enter password: " password
-    echo
-    if grep -q "^$username:" "$USER_FILE"; then
-        echo "Username already exists. Please log in."
-        return 1
-    fi
-    echo "$username:$password" >> "$USER_FILE"
-    echo "Registration successful!"
-}
+#!/bin/bash
 
-# Log in an existing user
-function login_user() {
-    read -p "Enter username: " username
-    read -sp "Enter password: " password
-    echo
-    if grep -q "^$username:$password" "$USER_FILE"; then
-        echo "Login successful!"
-        echo "$username" > /tmp/current_user.txt
-        return 0
-    else
-        echo "Invalid credentials."
-        return 1
-    fi
-}
+USER_FILE="/home/phong/idg1100-exam-main/login.txt"
 
-# Main function
-echo "1. Register"
-echo "2. Login"
-read -p "Select an option: " option
-if [[ "$option" == "1" ]]; then
-    while ! register_user; do :; done
-elif [[ "$option" == "2" ]]; then
-    while ! login_user; do :; done
+# Read POST data
+read POST_DATA
+USERNAME=$(echo "$POST_DATA" | sed -n 's/.*username=\([^&]*\).*/\1/p')
+PASSWORD=$(echo "$POST_DATA" | sed -n 's/.*password=\([^&]*\).*/\1/p')
+
+# Check if credentials match
+USER_DATA=$(grep "^$USERNAME:$PASSWORD" "$USER_FILE")
+if [[ -n "$USER_DATA" ]]; then
+    echo "Content-type: text/html"
+    echo ""
+    echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
+    echo "$USERNAME" > /tmp/current_user.txt
 else
-    echo "Invalid option."
+    echo "Content-type: text/html"
+    echo ""
+    echo "<h1>Login Failed!</h1>"
+    echo "<a href='/index.html'>Try again</a>"
 fi
-
-can you implement this in this 
