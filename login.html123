@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Weather Guessing Game</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form action="./login.sh" method="post">
+        <input type="hidden" name="action" value="login">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+
+    <h1>Register</h1>
+    <form action="./login.sh" method="post">
+        <input type="hidden" name="action" value="register">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <br>
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
