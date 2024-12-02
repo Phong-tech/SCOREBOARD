@@ -1,0 +1,43 @@
+#!/bin/bash
+
+LEADERBOARD_FILE="/home/phong/idg1100-exam-main/leaderboard.txt"
+CURRENT_USER_FILE="/tmp/current_user.txt"
+
+# Check if user is logged in
+if [[ ! -f "$CURRENT_USER_FILE" ]]; then
+    echo "Content-type: text/html"
+    echo ""
+    echo "<html><head><meta http-equiv='refresh' content='0;url=index.html'></head></html>"
+    exit 1
+fi
+USERNAME=$(cat "$CURRENT_USER_FILE")
+
+# Read POST data
+read POST_DATA
+CITY=$(echo "$POST_DATA" | sed -n 's/.*city=\([^&]*\).*/\1/p')
+GUESS=$(echo "$POST_DATA" | sed -n 's/.*guess=\([^&]*\).*/\1/p')
+
+# Simulate temperature fetching
+TEMPERATURE=$((RANDOM % 30))
+DIFF=$((GUESS > TEMPERATURE ? GUESS - TEMPERATURE : TEMPERATURE - GUESS))
+
+# Update leaderboard
+if grep -q "^$USERNAME:" "$LEADERBOARD_FILE"; then
+    OLD_DATA=$(grep "^$USERNAME:" "$LEADERBOARD_FILE")
+    PLAYS=$(echo "$OLD_DATA" | cut -d':' -f2)
+    TOTAL_DIFF=$(echo "$OLD_DATA" | cut -d':' -f3)
+
+    PLAYS=$((PLAYS + 1))
+    TOTAL_DIFF=$((TOTAL_DIFF + DIFF))
+    AVG_DIFF=$((TOTAL_DIFF / PLAYS))
+
+    sed -i "/^$USERNAME:/d" "$LEADERBOARD_FILE"
+    echo "$USERNAME:$PLAYS:$TOTAL_DIFF:$AVG_DIFF" >> "$LEADERBOARD_FILE"
+else
+    echo "$USERNAME:1:$DIFF:$DIFF" >> "$LEADERBOARD_FILE"
+fi
+
+# Display results
+echo "Content-type: text/html"
+echo ""
+cat game.html | sed "s/{{CITY}}/$CITY/" | sed "s/{{GUESS}}/$GUESS/" | sed "s/{{TEMPERATURE}}/$TEMPERATURE/" | sed "s/{{RESULT}}/$([[ $DIFF -le 5 ]] && echo 'You Win!' || echo 'You Lose')/"
