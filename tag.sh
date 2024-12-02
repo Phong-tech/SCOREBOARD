@@ -1,3 +1,8 @@
+!/bin/bash
+
+USER_FILE="/home/phong/idg1100-exam-main/login.txt"
+
+
 function handle_user() {
     read -p "Enter your gamer tag: " gamertag
     echo
@@ -22,4 +27,13 @@ function handle_user() {
         echo "Error: Unable to write to current_user.txt. Check permissions." >&2
         exit 1
     fi
+    
+ Main function
+ echo "1. Enter Gamer Tag to Play"
+ read -p "Select an option: " option
+ if [[ "$option" == "1" ]]; then
+     handle_user
+ else
+    echo "Invalid option."
+ fi
 }
