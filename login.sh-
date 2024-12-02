@@ -4,19 +4,43 @@ USER_FILE="/home/phong/idg1100-exam-main/login.txt"
 
 # Read POST data
 read POST_DATA
+ACTION=$(echo "$POST_DATA" | sed -n 's/.*action=\([^&]*\).*/\1/p')
 USERNAME=$(echo "$POST_DATA" | sed -n 's/.*username=\([^&]*\).*/\1/p')
 PASSWORD=$(echo "$POST_DATA" | sed -n 's/.*password=\([^&]*\).*/\1/p')
 
-# Check if credentials match
-USER_DATA=$(grep "^$USERNAME:$PASSWORD" "$USER_FILE")
-if [[ -n "$USER_DATA" ]]; then
-    echo "Content-type: text/html"
-    echo ""
-    echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
-    echo "$USERNAME" > /tmp/current_user.txt
+if [[ "$ACTION" == "login" ]]; then
+    # Check if credentials match using awk
+    USER_DATA=$(awk -F: -v user="$USERNAME" -v pass="$PASSWORD" '$1 == user && $2 == pass {print $0}' "$USER_FILE")
+    if [[ -n "$USER_DATA" ]]; then
+        echo "Content-type: text/html"
+        echo ""
+        echo "<html><head><meta http-equiv='refresh' content='0;url=game.html'></head></html>"
+        echo "$USERNAME" > /tmp/current_user.txt
+    else
+        echo "Content-type: text/html"
+        echo ""
+        echo "<h1>Login Failed!</h1>"
+        echo "<a href='/index.html'>Try again</a>"
+    fi
+elif [[ "$ACTION" == "register" ]]; then
+    # Check if the username already exists using awk
+    USER_EXISTS=$(awk -F: -v user="$USERNAME" '$1 == user {print $1}' "$USER_FILE")
+    if [[ -n "$USER_EXISTS" ]]; then
+        echo "Content-type: text/html"
+        echo ""
+        echo "<h1>Registration Failed: Username already exists!</h1>"
+        echo "<a href='/index.html'>Try again</a>"
+    else
+        # Add the new user to the file
+        echo "$USERNAME:$PASSWORD" >> "$USER_FILE"
+        echo "Content-type: text/html"
+        echo ""
+        echo "<h1>Registration Successful!</h1>"
+        echo "<a href='/index.html'>Go to login</a>"
+    fi
 else
     echo "Content-type: text/html"
     echo ""
-    echo "<h1>Login Failed!</h1>"
+    echo "<h1>Invalid Action!</h1>"
     echo "<a href='/index.html'>Try again</a>"
 fi
