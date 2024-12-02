@@ -1,31 +1,41 @@
-#!/bin/bash
+# Register a new user
+function register_user() {
+    read -p "Enter username: " username
+    read -sp "Enter password: " password
+    echo
+    if grep -q "^$username:" "$USER_FILE"; then
+        echo "Username already exists. Please log in."
+        return 1
+    fi
+    echo "$username:$password" >> "$USER_FILE"
+    echo "Registration successful!"
+}
 
-echo "Content-type: text/html"
-echo ""
+# Log in an existing user
+function login_user() {
+    read -p "Enter username: " username
+    read -sp "Enter password: " password
+    echo
+    if grep -q "^$username:$password" "$USER_FILE"; then
+        echo "Login successful!"
+        echo "$username" > /tmp/current_user.txt
+        return 0
+    else
+        echo "Invalid credentials."
+        return 1
+    fi
+}
 
-# Parse username
-read POST_DATA
-USERNAME=$(echo "$POST_DATA" | sed -n 's/^.*username=\([^&]*\).*$/\1/p' | sed 's/%20/ /g')
+# Main function
+echo "1. Register"
+echo "2. Login"
+read -p "Select an option: " option
+if [[ "$option" == "1" ]]; then
+    while ! register_user; do :; done
+elif [[ "$option" == "2" ]]; then
+    while ! login_user; do :; done
+else
+    echo "Invalid option."
+fi
 
-# Save username in a temporary file
-echo "$USERNAME" > /tmp/current_user.txt
-
-# Redirect to the game page
-cat <<EOM
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Successful</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Welcome, $USERNAME!</h1>
-    <form action="./test.sh" method="post">
-        <input type="number" name="guess" min="-99" max="99" step="1" placeholder="Enter your guess" required>
-        <input type="submit" value="Submit guess">
-    </form>
-</body>
-</html>
-EOM
+can you implement this in this 
